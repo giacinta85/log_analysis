@@ -1,20 +1,20 @@
 """
 File panel – macOS-style light theme.
-* Directly lists .out/.INFO files in the log directory (no extra dialog needed).
+* Directly lists log files in the directory with checkboxes.
+* Check a file to load it instantly; uncheck to remove it.
 * Log parsing runs in a background thread so the UI never freezes.
-* "Loaded files" section below shows parsed logs with per-file check toggle.
 """
 
 import os
 import threading
 import tkinter as tk
-from tkinter import ttk, filedialog
+from tkinter import filedialog
 from pathlib import Path
 from typing import Callable, List, Optional
 
 from core.parser import LogParser, LogData
 from ui.theme import (
-    BG, BG2, LIST_BG, FG, FG2, FG_INVERT,
+    BG, BG2, LIST_BG, FG, FG2,
     BORDER, SEP, ACCENT, ACCENT_DARK, ACCENT_FG,
     SEL_BG, BTN_BG, BTN_FG, ENTRY_BG, DANGER,
     TAB_BG, STATE_CHIP,
@@ -42,7 +42,6 @@ class FilePanel(tk.Frame):
         self._on_data_changed   = on_data_changed
         self._parser            = LogParser()
         self._all_logs: List[LogData]         = []
-        self._log_check_vars: List[tk.BooleanVar] = []
         self._state_filter_vars: dict         = {}
         self._dir_files: List[Path]           = []
         self._dir_check_vars: List[tk.BooleanVar] = []
@@ -54,11 +53,7 @@ class FilePanel(tk.Frame):
     # ── public API ────────────────────────────────────────────────────────────
 
     def get_active_logs(self) -> List[LogData]:
-        return [
-            self._all_logs[i]
-            for i, v in enumerate(self._log_check_vars)
-            if v.get() and i < len(self._all_logs)
-        ]
+        return list(self._all_logs)
 
     def get_state_filter(self) -> List[str]:
         return [s for s, v in self._state_filter_vars.items() if v.get()]
@@ -87,7 +82,8 @@ class FilePanel(tk.Frame):
         self._dir_var = tk.StringVar(value=DEFAULT_LOG_DIR)
         dir_entry = tk.Entry(entry_wrap, textvariable=self._dir_var,
                              font=("Helvetica", 8), bg=ENTRY_BG, fg=FG,
-                             relief="flat", insertbackground=FG)
+                             relief="flat", insertbackground=FG,
+                             highlightthickness=0)
         dir_entry.pack(fill="x", padx=4, pady=3)
         dir_entry.bind("<Return>", lambda _: self._refresh_dir_list())
 
@@ -139,42 +135,6 @@ class FilePanel(tk.Frame):
 
         self._draw_sep(row); row += 1
 
-        # ── Loaded files ─────────────────────────────
-        lhdr = tk.Frame(self, bg=BG)
-        lhdr.grid(row=row, column=0, sticky="ew", padx=6, pady=(2, 0))
-        lhdr.columnconfigure(0, weight=1)
-        row += 1
-        tk.Label(lhdr, text="Loaded files", bg=BG, fg=FG,
-                 font=("Helvetica", 10, "bold")).grid(row=0, column=0, sticky="w")
-        tk.Button(lhdr, text="Clear all", font=("Helvetica", 8),
-                  bg=BG, fg=DANGER, relief="flat", bd=0,
-                  highlightthickness=0, highlightbackground=BG,
-                  overrelief="flat",
-                  activebackground=BG, activeforeground=DANGER,
-                  command=self._clear_all).grid(
-            row=0, column=1, sticky="e")
-
-        loaded_outer = tk.Frame(self, bg=BORDER, bd=1, relief="flat")
-        loaded_outer.grid(row=row, column=0, sticky="nsew", padx=6, pady=(2, 0))
-        self.rowconfigure(row, weight=3)
-        row += 1
-
-        loaded_sb = tk.Scrollbar(loaded_outer, width=10)
-        loaded_sb.pack(side=tk.RIGHT, fill=tk.Y)
-        self._loaded_canvas = tk.Canvas(loaded_outer, bg=LIST_BG,
-                                        yscrollcommand=loaded_sb.set,
-                                        highlightthickness=0, bd=0)
-        self._loaded_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        loaded_sb.config(command=self._loaded_canvas.yview)
-        self._loaded_inner = tk.Frame(self._loaded_canvas, bg=LIST_BG)
-        self._loaded_canvas.create_window((0, 0), window=self._loaded_inner, anchor="nw")
-        self._loaded_inner.bind(
-            "<Configure>",
-            lambda e: self._loaded_canvas.configure(
-                scrollregion=self._loaded_canvas.bbox("all")))
-
-        self._draw_sep(row); row += 1
-
         # ── State filter ──────────────────────────────
         tk.Label(self, text="State filter", bg=BG, fg=FG,
                  font=("Helvetica", 10, "bold")).grid(
@@ -206,8 +166,9 @@ class FilePanel(tk.Frame):
         ]:
             tk.Button(qf_frame, text=label, font=("Helvetica", 8),
                       bg=BTN_BG, fg=BTN_FG, relief="flat", padx=8, pady=3,
-                      highlightthickness=0, bd=0,
-                      activebackground=SEL_BG, activeforeground=FG,
+                      highlightthickness=0, highlightbackground=BTN_BG,
+                      bd=0, overrelief="flat",
+                      activebackground=SEL_BG, activeforeground=BTN_FG,
                       command=lambda s=states: self._quick_filter(s)
                       ).pack(side=tk.LEFT, padx=(0, 4))
 
@@ -285,7 +246,6 @@ class FilePanel(tk.Frame):
             if path in self._dir_loaded_paths:
                 self._dir_loaded_paths.discard(path)
                 self._all_logs = [l for l in self._all_logs if l.filepath != path]
-                self._rebuild_loaded_list()
                 self._status_var.set(f"{len(self._all_logs)} file(s) loaded")
                 self._on_data_changed()
 
@@ -314,7 +274,6 @@ class FilePanel(tk.Frame):
     def _on_parse_done(self, loaded: List[LogData], errors: List[str]):
         self._parsing = False
         self._all_logs.extend(loaded)
-        self._rebuild_loaded_list()
         msg = f"{len(self._all_logs)} file(s) loaded"
         if errors:
             msg += f"\n⚠ {'; '.join(errors[:2])}"
@@ -323,47 +282,9 @@ class FilePanel(tk.Frame):
 
     # ── Loaded list ───────────────────────────────────────────────────────────
 
-    def _rebuild_loaded_list(self):
-        for w in self._loaded_inner.winfo_children():
-            w.destroy()
-        self._log_check_vars = []
-        for i, log in enumerate(self._all_logs):
-            v = tk.BooleanVar(value=True)
-            self._log_check_vars.append(v)
-            row_frame = tk.Frame(self._loaded_inner, bg=LIST_BG)
-            row_frame.pack(fill="x", padx=2, pady=1)
-            tk.Checkbutton(
-                row_frame, text=log.filename[:22], variable=v,
-                bg=LIST_BG, fg=FG, selectcolor=LIST_BG,
-                activebackground=LIST_BG, font=("Courier", 8), anchor="w",
-                command=self._on_filter_change,
-            ).pack(side=tk.LEFT, fill="x", expand=True)
-            tk.Label(row_frame,
-                     text=f"{log.duration:.0f}s/{log.frame_count}fr",
-                     bg=LIST_BG, fg=FG2, font=("Helvetica", 7)
-                     ).pack(side=tk.RIGHT, padx=2)
-            tk.Button(row_frame, text="✕", font=("Helvetica", 8), width=2,
-                      command=lambda idx=i: self._remove_log(idx),
-                      bg=LIST_BG, relief="flat", fg=DANGER, cursor="hand2",
-                      highlightthickness=0,
-                      activebackground=LIST_BG).pack(side=tk.RIGHT)
-
-    def _remove_log(self, idx: int):
-        if 0 <= idx < len(self._all_logs):
-            path = self._all_logs[idx].filepath
-            self._dir_loaded_paths.discard(path)
-            self._all_logs.pop(idx)
-            self._rebuild_loaded_list()
-            for i, f in enumerate(self._dir_files):
-                if str(f) == path and i < len(self._dir_check_vars):
-                    self._dir_check_vars[i].set(False)
-                    break
-            self._on_data_changed()
-
     def _clear_all(self):
         self._dir_loaded_paths.clear()
         self._all_logs.clear()
-        self._rebuild_loaded_list()
         for v in self._dir_check_vars:
             v.set(False)
         self._status_var.set("All files cleared.")

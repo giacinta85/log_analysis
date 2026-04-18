@@ -65,8 +65,9 @@ class OverviewView(tk.Frame):
                        command=self._on_change).pack(anchor="w", padx=16)
 
         tk.Button(ctrl, text="Plot", font=("Helvetica", 10, "bold"),
-                  bg=ACCENT, fg=ACCENT_FG, relief="flat",
-                  highlightthickness=0,
+                  bg=ACCENT, fg=ACCENT_FG, relief="flat", bd=0,
+                  highlightthickness=0, highlightbackground=ACCENT,
+                  overrelief="flat",
                   activebackground="#005cc5", activeforeground=ACCENT_FG,
                   pady=5, command=self._on_change).pack(fill="x", padx=8, pady=10)
 

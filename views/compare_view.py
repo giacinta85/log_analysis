@@ -47,10 +47,16 @@ class CompareView(tk.Frame):
         tk.Label(ctrl, text="Field", font=("Helvetica", 11, "bold"),
                  bg=CTRL_BG, fg=FG).pack(anchor="w", padx=8, pady=(10, 2))
         self._field_var = tk.StringVar(value="tau_")
-        self._field_combo = ttk.Combobox(ctrl, textvariable=self._field_var,
-                                         values=COMPARE_FIELDS, state="readonly", width=18)
-        self._field_combo.pack(padx=8, pady=4, fill="x")
-        self._field_combo.bind("<<ComboboxSelected>>", lambda _: self._on_change())
+        om = tk.OptionMenu(ctrl, self._field_var, *COMPARE_FIELDS)
+        om.configure(bg=BTN_BG, fg=BTN_FG, relief="flat", bd=0,
+                     highlightthickness=0, highlightbackground=BTN_BG,
+                     overrelief="flat", direction="below",
+                     activebackground=SEL_BG, activeforeground=BTN_FG)
+        om["menu"].configure(bg=LIST_BG, fg=FG,
+                             activebackground=SEL_BG, activeforeground=FG,
+                             relief="flat", bd=1)
+        om.pack(padx=8, pady=4, fill="x")
+        self._field_var.trace_add("write", lambda *_: self._on_change())
 
         tk.Frame(ctrl, bg=BORDER, height=1).pack(fill="x", padx=6, pady=4)
 
@@ -61,8 +67,9 @@ class CompareView(tk.Frame):
         for i, g in enumerate(list(JOINT_GROUPS.keys()) + ["all"]):
             tk.Button(bf, text=g, font=("Helvetica", 9), width=8,
                       bg=BTN_BG, fg=BTN_FG, relief="flat", bd=0,
-                      highlightthickness=0, activebackground=SEL_BG,
-                      activeforeground=BTN_FG,
+                      highlightthickness=0, highlightbackground=BTN_BG,
+                      overrelief="flat",
+                      activebackground=SEL_BG, activeforeground=BTN_FG,
                       command=lambda grp=g: self._select_group(grp)
                       ).grid(row=i // 2, column=i % 2, padx=2, pady=2, sticky="ew")
         bf.columnconfigure(0, weight=1)
@@ -93,8 +100,9 @@ class CompareView(tk.Frame):
             pass
 
         tk.Button(ctrl, text="Plot", font=("Helvetica", 10, "bold"),
-                  bg=ACCENT, fg=ACCENT_FG, relief="flat",
-                  highlightthickness=0,
+                  bg=ACCENT, fg=ACCENT_FG, relief="flat", bd=0,
+                  highlightthickness=0, highlightbackground=ACCENT,
+                  overrelief="flat",
                   activebackground="#005cc5", activeforeground=ACCENT_FG,
                   pady=5, command=self._on_change).pack(fill="x", padx=8, pady=6)
 

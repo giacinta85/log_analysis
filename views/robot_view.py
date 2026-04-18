@@ -75,13 +75,16 @@ class RobotView(tk.Frame):
         ]
         for gname, gset in groups:
             tk.Button(ctrl, text=gname, font=("Helvetica", 9),
-                      bg=BTN_BG, fg=BTN_FG, relief="flat",
-                      highlightthickness=0, activebackground=SEL_BG,
+                      bg=BTN_BG, fg=BTN_FG, relief="flat", bd=0,
+                      highlightthickness=0, highlightbackground=BTN_BG,
+                      overrelief="flat",
+                      activebackground=SEL_BG, activeforeground=BTN_FG,
                       command=lambda s=gset: select_group(s)).pack(fill="x", padx=8, pady=2)
 
         tk.Button(ctrl, text="Plot", font=("Helvetica", 10, "bold"),
-                  bg=ACCENT, fg=ACCENT_FG, relief="flat",
-                  highlightthickness=0,
+                  bg=ACCENT, fg=ACCENT_FG, relief="flat", bd=0,
+                  highlightthickness=0, highlightbackground=ACCENT,
+                  overrelief="flat",
                   activebackground="#005cc5", activeforeground=ACCENT_FG,
                   pady=5, command=self._on_change).pack(fill="x", padx=8, pady=8)
 

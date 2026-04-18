@@ -25,9 +25,33 @@ plt.rcParams.update({
 })
 
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 
 from ui.main_window import MainWindow
+from ui.theme import BG, BG2, FG, ENTRY_BG, LIST_BG, SEL_BG, BTN_BG, BTN_FG, BORDER, ACCENT
+
+
+def _apply_ttk_style(root: tk.Tk):
+    """Override ttk widget styles to use the forced-light theme."""
+    s = ttk.Style(root)
+    # Use 'default' as the base (avoids macOS Aqua dark-mode interference)
+    s.theme_use("default")
+    s.configure("TCombobox",
+                fieldbackground=ENTRY_BG,
+                background=BTN_BG,
+                foreground=FG,
+                selectbackground=SEL_BG,
+                selectforeground=FG,
+                bordercolor=BORDER,
+                lightcolor=BORDER,
+                darkcolor=BORDER,
+                arrowcolor=FG,
+                padding=3)
+    s.map("TCombobox",
+          fieldbackground=[("readonly", ENTRY_BG), ("disabled", BG2)],
+          foreground=[("disabled", "#888888")])
+    # Scrollbar
+    s.configure("TScrollbar", troughcolor=BG2, background=BTN_BG, bordercolor=BORDER)
 
 
 def main():
@@ -38,6 +62,8 @@ def main():
     root.option_add("*Button.highlightThickness", 0)
     root.option_add("*Button.borderWidth", 0)
     root.option_add("*Button.relief", "flat")
+
+    _apply_ttk_style(root)
 
     try:
         app = MainWindow(root)

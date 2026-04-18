@@ -14,7 +14,7 @@ from views.compare_view import CompareView
 from views.robot_view import RobotView
 
 
-VIEW_NAMES = ["Joint", "Overview", "Compare", "Robot"]
+VIEW_NAMES = ["Joint", "Overview", "Compare", "Obs"]
 VIEW_CLASSES = [JointView, OverviewView, CompareView, RobotView]
 
 
