@@ -50,7 +50,7 @@ class CompareView(tk.Frame):
         om = tk.OptionMenu(ctrl, self._field_var, *COMPARE_FIELDS)
         om.configure(bg=BTN_BG, fg=BTN_FG, relief="flat", bd=0,
                      highlightthickness=0, highlightbackground=BTN_BG,
-                     overrelief="flat", direction="below",
+                     direction="below",
                      activebackground=SEL_BG, activeforeground=BTN_FG)
         om["menu"].configure(bg=LIST_BG, fg=FG,
                              activebackground=SEL_BG, activeforeground=FG,
