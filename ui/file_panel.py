@@ -20,7 +20,7 @@ from ui.theme import (
     TAB_BG, STATE_CHIP,
 )
 
-DEFAULT_LOG_DIR = "/Users/giacinta/workspace/lumos_ws/logs"
+DEFAULT_LOG_DIR = str((Path(__file__).resolve().parents[3] / "logs").resolve())
 LOG_EXTENSIONS  = {".out", ".info", ".log"}
 
 STATE_LIST = [

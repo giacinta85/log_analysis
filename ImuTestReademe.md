@@ -6,9 +6,9 @@
 
 - 3588 SSH：`lumosbot@192.168.54.110`
 - 远端工程：`/home/lumosbot/thomas_ws/lumos_controller`
-- 本地工具目录：`/Users/giacinta/workspace/lumos_ws/lumos_tools/log_analysis`
-- 本地日志目录：`/Users/giacinta/workspace/lumos_ws/logs/imu`
-- 本地图像目录：`/Users/giacinta/workspace/lumos_ws/lumos_tools/log_analysis/outputs`
+- 本地工具目录：当前仓库目录 `log_analysis/`
+- 本地日志目录：`../../logs/imu`，相对当前仓库目录
+- 本地图像目录：`outputs/`
 - 双 IMU 测试程序：`build/example/daisi_imu_handler_test`
 - 单 IMU 测试程序：`build/example/imu_handler_test`
 - 测试采样频率：目标 `200Hz`，源码使用 `sleep_until` 固定 `5ms` 周期
@@ -50,7 +50,7 @@ resource/example/device-test/daisi_imu_handler_test.cpp
 只检查 3588 当前映射、规则文件、是否有 IMU 测试进程，不修改远端：
 
 ```bash
-cd /Users/giacinta/workspace/lumos_ws/lumos_tools/log_analysis
+cd log_analysis
 ./deploy_imu_env.sh --check
 ```
 
@@ -68,7 +68,7 @@ cd /Users/giacinta/workspace/lumos_ws/lumos_tools/log_analysis
 正式部署：
 
 ```bash
-cd /Users/giacinta/workspace/lumos_ws/lumos_tools/log_analysis
+cd log_analysis
 ./deploy_imu_env.sh
 ```
 
@@ -162,7 +162,7 @@ ls -lh example/daisi_imu_handler_test example/imu_handler_test
 默认运行双 IMU 测试，时长 10 分钟：
 
 ```bash
-cd /Users/giacinta/workspace/lumos_ws/lumos_tools/log_analysis
+cd log_analysis
 ./run_imu_test.sh
 ```
 
@@ -190,7 +190,7 @@ cd /Users/giacinta/workspace/lumos_ws/lumos_tools/log_analysis
 只测试 `/dev/ttyUSB0`：
 
 ```bash
-cd /Users/giacinta/workspace/lumos_ws/lumos_tools/log_analysis
+cd log_analysis
 ./run_imu_test.sh --imu ttyUSB0
 ```
 
@@ -227,7 +227,7 @@ ttyUSB1_drift_YYYYMMDD_HHMMSS_10min.log
 如果已有日志，只想重新画图：
 
 ```bash
-cd /Users/giacinta/workspace/lumos_ws/lumos_tools/log_analysis
+cd log_analysis
 zsh ./run.sh -m imu -log <log_file_name>
 ```
 
@@ -257,7 +257,7 @@ zsh ./run.sh -m imu -log ttyUSB1_drift_20260707_153749_10min.log
 ```text
 当前目录
 log_analysis/
-/Users/giacinta/workspace/lumos_ws/logs/imu/
+../../logs/imu/
 ```
 
 默认输出文件：
@@ -369,13 +369,13 @@ zsh ./run.sh -m imu -log <log_file_name>
 日志：
 
 ```text
-/Users/giacinta/workspace/lumos_ws/logs/imu/
+../../logs/imu/
 ```
 
 图像：
 
 ```text
-/Users/giacinta/workspace/lumos_ws/lumos_tools/log_analysis/outputs/
+outputs/
 ```
 
 ## 10. 常见问题
@@ -424,6 +424,6 @@ ls -l /dev/ttyUSB_imu /dev/ttyUSB_imu2 /dev/ttyUSB0 /dev/ttyUSB1 /dev/serial/by-
 `run.sh` 会自动使用或创建 `lumos_log` 环境。如果环境损坏，可重建：
 
 ```bash
-cd /Users/giacinta/workspace/lumos_ws/lumos_tools/log_analysis
+cd log_analysis
 zsh ./run.sh --rebuild
 ```

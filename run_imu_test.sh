@@ -5,8 +5,8 @@ REMOTE="${REMOTE:-lumosbot@192.168.54.110}"
 REMOTE_DIR="${REMOTE_DIR:-/home/lumosbot/thomas_ws/lumos_controller}"
 IMU_A="${IMU_A:-/dev/ttyUSB_imu}"
 IMU_B="${IMU_B:-/dev/ttyUSB_imu2}"
-LOCAL_LOG_DIR="${LOCAL_LOG_DIR:-/Users/giacinta/workspace/lumos_ws/logs/imu}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LOCAL_LOG_DIR="${LOCAL_LOG_DIR:-${SCRIPT_DIR}/../../logs/imu}"
 ANALYSIS_DIR="${ANALYSIS_DIR:-$SCRIPT_DIR}"
 DURATION_MINUTES=10
 RUN_PLOT=1
@@ -29,7 +29,7 @@ Defaults:
   remote:  lumosbot@192.168.54.110
   length:  10 minutes
   imu:     both
-  output:  /Users/giacinta/workspace/lumos_ws/logs/imu
+  output:  ../../logs/imu, relative to this script
   plot:    PNG only; add --html to also generate interactive HTML
 
 Environment overrides:
